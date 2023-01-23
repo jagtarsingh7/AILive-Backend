@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+  {{ cookiecutter.docker_service_name }}:
+    build:
+      context: .
+      ssh:
+        - default
+    command: start.sh
+    volumes:
+        - .:/app
+        - ~/.ssh/id_ed25519:/root/.ssh/id_rsa
+    ports:
+      - "{{cookiecutter.api_port}}:{{cookiecutter.api_port}}"
+    environment:
+      - DOCKER_BUILDKIT=1
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    volumes:
+      - db_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+
+volumes:
+  db_data:

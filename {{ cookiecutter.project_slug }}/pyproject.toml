@@ -1,0 +1,51 @@
+[tool.poetry]
+name = "{{ cookiecutter.project_module }}"
+version = "0.3.2"
+description = "{{ cookiecutter.project_description }}"
+authors = ["Canvass Analytics <canvass@canvass.io>",]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^{{ cookiecutter.python_version }}"
+
+[tool.poetry.group.dev.dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+known_local_folder = "tools,tests,{{ cookiecutter.project_module }},alembic"
+sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+default_section = "THIRDPARTY"
+
+[tool.bandit]
+skips = ["B101", "B601"]
+exclude = ["tests", "venv"]
+
+[tool.skjold]
+sources = ["pypa"]
+report_only = true
+verbose = true
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration (deselect with '-m \"not integration\"')",
+    "unit: marks tests as unit (deselect with '-m \"not unit\"')",
+]
+testpaths = ["{{cookiecutter.project_module}}/tests"]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+omit = ["{{cookiecutter.project_module}}/tests/*", "venv/*", "{{ cookiecutter.project_module }}/main.py", "{{ cookiecutter.project_module }}/core/config.py"]

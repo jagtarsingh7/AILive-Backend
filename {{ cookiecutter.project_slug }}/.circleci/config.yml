@@ -1,0 +1,182 @@
+version: 2.1
+
+references:
+
+  install_canvass_deployer_package: &install_canvass_deployer_package
+    run:
+      name: Install Invoke Package
+      command: pip3 install git+https://${GITHUB_API_KEY}:x-oauth-basic@github.com/canvassanalytics/canvass-deployer.git@master
+
+  invoke_build_command: &invoke_build_command
+    run:
+      name: Build Project
+      command: invoke --collection invoke_tasks build
+
+  invoke_create_pr_command: &invoke_create_pr_command
+    run:
+      name: Create Deployments Pull Request
+      command: invoke --collection invoke_tasks createpr
+
+  python_image: &python_image
+    resource_class: small
+    working_directory: ~
+    docker:
+      - image: cimg/python:{{ cookiecutter.python_version}}
+
+  filter_all_branches_and_tags: &filter_all_branches_and_tags
+    filters:
+      tags:
+        only: /.*/
+
+  filter_tags_only_and_ignore_branches: &filter_tags_only_and_ignore_branches
+    filters:
+      tags:
+        only: /.*/
+      branches:
+        ignore: /.*/
+
+jobs:
+
+  test:
+    <<: *python_image
+    steps:
+      - checkout
+      - run:
+          name: Setup Environment Variables
+          command: |
+            echo 'export DATABASE_URL=sqlite+aiosqlite:///' >> "$BASH_ENV"
+      - run:
+          name: Install Poetry  # https://github.com/CircleCI-Public/cimg-python/issues/146
+          command: |
+            curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python - --uninstall
+            curl -sSL https://install.python-poetry.org | python -
+      - run:
+          name: Install pre-commit
+          command: |
+            pip install pre-commit
+      - run:
+          name: Install dependencies
+          command: |
+            poetry install
+      - run:
+          name: Python Linting
+          command: |
+            make lint
+      - run:
+          name: Run Unit Tests
+          command: |
+            make test-cov-ci
+      - store_test_results:
+          path: htmlcov/
+      - store_artifacts:
+          path: htmlcov/
+
+  build:
+    <<: *python_image
+    steps:
+      - checkout
+      - setup_remote_docker
+      - *install_canvass_deployer_package
+      - *invoke_build_command
+
+  create_pull_request:
+    <<: *python_image
+    steps:
+      - checkout
+      - setup_remote_docker
+      - *install_canvass_deployer_package
+      - *invoke_create_pr_command
+
+  # -----------------------------
+  # -->> DEPLOY TO SANDBOXES
+  # -----------------------------
+  deploy-to-sandbox-1:
+    <<: *python_image
+    steps:
+      - checkout
+      - setup_remote_docker
+      - *install_canvass_deployer_package
+      - run:
+          name: Deploy Project to Sandbox-1
+          command: |
+            invoke --collection invoke_tasks deploy --env-name PREPROD --namespace sandbox-1
+
+  deploy-to-sandbox-2:
+    <<: *python_image
+    steps:
+      - checkout
+      - setup_remote_docker
+      - *install_canvass_deployer_package
+      - run:
+          name: Deploy Project to Sandbox-2
+          command: |
+            invoke --collection invoke_tasks deploy --env-name PREPROD --namespace sandbox-2
+
+  deploy-to-sandbox-3:
+    <<: *python_image
+    steps:
+      - checkout
+      - setup_remote_docker
+      - *install_canvass_deployer_package
+      - run:
+          name: Deploy Project to Sandbox-3
+          command: |
+            invoke --collection invoke_tasks deploy --env-name PREPROD --namespace sandbox-3
+
+workflows:
+  version: 2
+
+  test-build-deploy:
+    jobs:
+      - test:
+          <<: *filter_all_branches_and_tags
+          context: canvass-test-build-deploy
+      - build:
+          <<: *filter_all_branches_and_tags
+          requires:
+            - test
+          context: canvass-test-build-deploy
+
+      # Automated Pull Request Creation for Deployments
+      - create_pull_request:
+          <<: *filter_tags_only_and_ignore_branches
+          requires:
+            - build
+          context: canvass-test-build-deploy
+
+      # Deploying to Sandbox environments
+      - sandbox-1:
+          <<: *filter_all_branches_and_tags
+          type: approval
+          requires:
+            - build
+          context: canvass-test-build-deploy
+      - deploy-to-sandbox-1:
+          <<: *filter_all_branches_and_tags
+          requires:
+            - sandbox-1
+          context: canvass-test-build-deploy
+
+      - sandbox-2:
+          <<: *filter_all_branches_and_tags
+          type: approval
+          requires:
+            - build
+          context: canvass-test-build-deploy
+      - deploy-to-sandbox-2:
+          <<: *filter_all_branches_and_tags
+          requires:
+            - sandbox-2
+          context: canvass-test-build-deploy
+
+      - sandbox-3:
+          <<: *filter_all_branches_and_tags
+          type: approval
+          requires:
+            - build
+          context: canvass-test-build-deploy
+      - deploy-to-sandbox-3:
+          <<: *filter_all_branches_and_tags
+          requires:
+            - sandbox-3
+          context: canvass-test-build-deploy

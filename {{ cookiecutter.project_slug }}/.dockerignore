@@ -1,0 +1,10 @@
+.git
+.gitignore
+.pre-commit-config.yaml
+Dockerfile
+Makefile
+CHANGELOG.md
+README.md
+template.env
+.idea
+.vscode
