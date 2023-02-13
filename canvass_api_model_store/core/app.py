@@ -1,6 +1,7 @@
 """Module containing function definition to create an instance of a FastAPI application."""
 from fastapi import FastAPI
 
+from canvass_api_model_store.api.auth import auth_router
 from canvass_api_model_store.api.health import health_router
 from canvass_api_model_store.api.v1 import v1_router
 from canvass_api_model_store.core.config import settings
@@ -29,5 +30,6 @@ def create_app() -> FastAPI:
 
     app.router.include_router(health_router)
     app.router.include_router(v1_router)
+    app.router.include_router(auth_router)
 
     return app
