@@ -3,7 +3,7 @@
 import datetime as dt
 from typing import Optional
 
-import api.v1.auth.models as _models
+import models.models as _models
 from pydantic import BaseModel
 
 

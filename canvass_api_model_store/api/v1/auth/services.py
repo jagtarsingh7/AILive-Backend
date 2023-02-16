@@ -2,11 +2,11 @@
 
 import os
 
-import api.v1.auth.models as _models
-import api.v1.auth.schemas as _schemas
 import jwt
-from api.v1.auth.database import SessionLocal
+import models.models as _models
+import models.schemas as _schemas
 from fastapi import Depends, FastAPI, HTTPException, security
+from models.database import SessionLocal
 from passlib import hash
 from sqlalchemy import orm
 

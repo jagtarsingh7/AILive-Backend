@@ -2,7 +2,7 @@
 
 import datetime as dt
 
-from api.v1.auth.database import Base
+from models.database import Base
 from passlib.hash import bcrypt
 from sqlalchemy import ARRAY, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship

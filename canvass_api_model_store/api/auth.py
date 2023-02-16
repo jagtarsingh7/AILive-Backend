@@ -2,8 +2,9 @@
 
 from typing import List
 
-from api.v1.auth import schemas, services
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, security
+from api.v1.auth import services
+from fastapi import APIRouter, Depends, HTTPException, security
+from models import schemas
 from sqlalchemy import orm
 
 auth_router = APIRouter(prefix="/auth")
