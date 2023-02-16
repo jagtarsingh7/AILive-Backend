@@ -9,12 +9,12 @@ For example, you can use them to implement a `pre_create` method that sends an e
 ```python
 ...  # imports
 from canvass_fastapi.actions import BaseAction
-from {{ cookiecutter.project_module }}.models import User
+from canvass_api_model_store.models import User
 
 class WelcomeEmailAction(BaseAction):
     async def pre_create(self, user: User, context: dict = None) -> None:
         # Send an email to the user
-        await send_email(user.email, "Welcome to {{ cookiecutter.project_name }}!")
+        await send_email(user.email, "Welcome to canvass-api-model-store!")
 ```
 
 ## Usage
@@ -23,7 +23,7 @@ To use an action, you need to register it in the repositories that you want to u
 
 ```python
 ...  # imports
-from {{ cookiecutter.project_module }}.actions import WelcomeEmailAction
+from canvass_api_model_store.actions import WelcomeEmailAction
 
 
 class UserRepository(AsyncModelRepository[User]):

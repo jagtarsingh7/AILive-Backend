@@ -1,7 +1,7 @@
-FROM python:{{ cookiecutter.python_version }}-slim
+FROM python:3.10.7-slim
 
 ARG ENV
-ARG SRC_DIR={{ cookiecutter.project_module }}
+ARG SRC_DIR=canvass_api_model_store
 
 ENV ENV=${ENV} \
   PYTHONFAULTHANDLER=1 \
@@ -11,7 +11,7 @@ ENV ENV=${ENV} \
   PIP_NO_CACHE_DIR=true \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100 \
-  POETRY_VERSION={{cookiecutter.poetry_version}} \
+  POETRY_VERSION=1.2.1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_NO_INTERACTION=1 \
   POETRY_NO_ANSI=1 \

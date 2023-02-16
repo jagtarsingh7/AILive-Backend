@@ -21,7 +21,7 @@ references:
     resource_class: small
     working_directory: ~
     docker:
-      - image: cimg/python:{{ cookiecutter.python_version}}
+      - image: cimg/python:3.10.7
 
   filter_all_branches_and_tags: &filter_all_branches_and_tags
     filters:

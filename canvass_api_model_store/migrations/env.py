@@ -9,8 +9,8 @@ from sqlmodel import SQLModel
 
 from alembic import context
 from alembic.script import ScriptDirectory
-from {{cookiecutter.project_module}}.core.config import settings
-from {{cookiecutter.project_module}}.models import *  # noqa: F401, F403
+from canvass_api_model_store.core.config import settings
+from canvass_api_model_store.models import *  # noqa: F401, F403
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

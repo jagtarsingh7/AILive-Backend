@@ -20,8 +20,8 @@ class Settings(BaseSettings):
 
     api_v1_str: str = "v1"
     api_host: str = "localhost"
-    api_port: int = {{cookiecutter.api_port}}
-    api_prefix: str | None = {{ "{{cookiecutter.api_prefix}}" if cookiecutter.api_prefix else None }}
+    api_port: int = 8000
+    api_prefix: str | None = None
     debug: bool = False
     backend_cors_origin: str | list[str] = []
     database_url: str

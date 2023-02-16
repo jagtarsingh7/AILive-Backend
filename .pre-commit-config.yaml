@@ -46,7 +46,7 @@ repos:
           - --ignore=E501,W503,E203,F401,F811
 
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.10.1
+    rev: 5.12.0
     hooks:
       - id: isort
         description: Sort imports in Python code

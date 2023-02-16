@@ -3,9 +3,9 @@ import pytest
 from canvass_fastapi.models import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from {{cookiecutter.project_module}}.core.db import async_engine
-from {{cookiecutter.project_module}}.models import *  # noqa: F401, F403
-from {{cookiecutter.project_module}}.tests.factories import register_factories
+from canvass_api_model_store.core.db import async_engine
+from canvass_api_model_store.models import *  # noqa: F401, F403
+from canvass_api_model_store.tests.factories import register_factories
 
 
 @pytest.fixture(scope="module")
@@ -22,7 +22,7 @@ def app():
         No Exceptions defined
 
     """
-    from {{cookiecutter.project_module}}.core.app import create_app
+    from canvass_api_model_store.core.app import create_app
 
     return create_app()
 

@@ -2,7 +2,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from {{cookiecutter.project_module}}.core.config import settings
+from canvass_api_model_store.core.config import settings
 
 async_engine = create_async_engine(settings.database_url, future=True, echo=settings.debug)
 

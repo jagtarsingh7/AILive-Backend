@@ -1,5 +1,5 @@
 """Module containing function definitions to API version."""
-from {{cookiecutter.project_module}} import __version__
+from canvass_api_model_store import __version__
 
 
 def test_version():

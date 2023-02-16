@@ -1,9 +1,9 @@
 """Main module that runs that FastAPI server."""
 import logging
 
-from {{cookiecutter.project_module}} import __version__
-from {{cookiecutter.project_module}}.core.app import create_app
-from {{cookiecutter.project_module}}.core.config import settings
+from canvass_api_model_store import __version__
+from canvass_api_model_store.core.app import create_app
+from canvass_api_model_store.core.config import settings
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,7 +20,7 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(
-        "{{ cookiecutter.project_module }}.main:app",
+        "canvass_api_model_store.main:app",
         host=settings.api_host,
         port=settings.api_port,
         reload=settings.debug,
