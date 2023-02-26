@@ -25,11 +25,6 @@ def get_db():
         db.close()
 
 
-# async def get_user_by_email(email: str, db: orm.Session):
-#     """Function get user by email."""
-#     return db.query(_models.User).filter(_models.User.email == email).first()
-
-
 async def get_current_user(
     db: orm.Session = Depends(get_db),
     token: str = Depends(oauth2schema),
@@ -52,3 +47,24 @@ async def create_model(user: _schemas.User, db: orm.Session, model: _schemas.Mod
     db.refresh(model)
 
     return _schemas.Model.from_orm(model)
+
+
+async def model_selector(model_id: int, user: _schemas.User, db: orm.Session):
+    model = (
+        db.query(_models.Model)
+        .filter_by(user_id=user.id)
+        .filter(_models.Model.id == model_id)
+        .first()
+    )
+
+    if model is None:
+        raise HTTPException(status_code=404, detail="Model does not exist")
+
+    return model
+
+
+async def delete_model(model_id: int, user: _schemas.User, db: orm.Session):
+    model = await model_selector(model_id, user, db)
+
+    db.delete(model)
+    db.commit()
