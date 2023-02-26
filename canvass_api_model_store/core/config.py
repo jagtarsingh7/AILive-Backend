@@ -1,6 +1,6 @@
 """Module containing the definition of the Settings class."""
 from functools import lru_cache
-
+from api import constants
 from pydantic import BaseSettings, validator
 
 
@@ -20,7 +20,7 @@ class Settings(BaseSettings):
 
     api_v1_str: str = "v1"
     api_host: str = "localhost"
-    api_port: int = 8000
+    api_port: int = constants.API_PORT
     api_prefix: str | None = None
     debug: bool = False
     backend_cors_origin: str | list[str] = []

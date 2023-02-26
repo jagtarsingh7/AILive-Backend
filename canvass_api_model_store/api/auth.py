@@ -2,7 +2,7 @@
 
 from typing import List
 
-import constants
+from api import constants
 from api.v1.auth import services
 from fastapi import APIRouter, Depends, HTTPException, security
 from models import schemas
@@ -22,6 +22,7 @@ async def create_user(new_user: schemas.UserCreate, db: orm.Session = Depends(se
 
     Raises:
         HTTPException: If email is already in use.
+        HTTPException: If an internal server error occurs.
 
     Returns:
         A token for the created user.
