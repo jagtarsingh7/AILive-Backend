@@ -1,14 +1,15 @@
 """Module containing services for auth routes."""
 
 import os
-
+import constants
 import jwt
 import models.models as _models
 import models.schemas as _schemas
-from fastapi import Depends, FastAPI, HTTPException, security
+from fastapi import Depends, HTTPException, security
 from models.database import SessionLocal
 from passlib import hash
 from sqlalchemy import orm
+from sqlalchemy.exc import SQLAlchemyError
 
 oauth2schema = security.OAuth2PasswordBearer(tokenUrl="/auth/api/token")
 
@@ -21,13 +22,16 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=constants.Internal_Server_Error, detail="Database Error")
     finally:
         db.close()
 
 
 async def get_user_by_email(email: str, db: orm.Session):
     """Function get user by email."""
-    return db.query(_models.User).filter(_models.User.email == email).first()
+    return db.query(_models.User).filter(_models.User.email == email).one()
 
 
 async def create_user(user: _schemas.UserCreate, db: orm.Session):
@@ -72,6 +76,6 @@ async def get_current_user(
         payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
         user = db.query(_models.User).get(payload["id"])
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid Email or Password")
+        raise HTTPException(status_code=constants.Unauthorized, detail="Invalid Email or Password")
 
     return _schemas.User.from_orm(user)
