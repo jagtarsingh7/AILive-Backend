@@ -2,10 +2,11 @@
 
 import datetime as dt
 
-from models.database import Base
 from passlib.hash import bcrypt
 from sqlalchemy import ARRAY, Column, DateTime, ForeignKey, Integer, String, JSON
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import declarative_base, relationship
+
+Base = declarative_base()
 
 
 class User(Base):

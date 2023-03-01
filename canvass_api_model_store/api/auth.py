@@ -27,11 +27,12 @@ async def create_user(new_user: schemas.UserCreate, db: orm.Session = Depends(se
     Returns:
         A token for the created user.
     """
-    try:
-        db_user = await services.get_user_by_email(new_user.email, db)
-        if db_user:
-            raise HTTPException(status_code=constants.Bad_Request, detail="Email already in use")
 
+    db_user = await services.get_user_by_email(new_user.email, db)
+    if db_user:
+        raise HTTPException(status_code=constants.Bad_Request, detail="Email already in use")
+
+    try:
         new_user = await services.create_user(new_user, db)
 
         return await services.create_token(new_user)

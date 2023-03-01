@@ -52,7 +52,7 @@ async def get_user_by_email(email: str, db: orm.Session):
     Returns:
         models.models.User: The user object matching the specified email address.
     """
-    return db.query(_models.User).filter(_models.User.email == email).first()
+    return db.query(_models.User).filter(_models.User.email == email).one_or_none()
 
 
 async def create_user(user: _schemas.UserCreate, db: orm.Session):
