@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+  api:
+    build:
+      context: .
+      ssh:
+        - default
+    command: start.sh
+    volumes:
+        - .:/app
+        - ~/.ssh/id_ed25519:/root/.ssh/id_rsa
+    ports:
+      - "8000:8000"
+    environment:
+      - DOCKER_BUILDKIT=1
+    env_file:
+      - .env
+
+volumes:
+  db_data:

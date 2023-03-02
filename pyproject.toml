@@ -1,0 +1,70 @@
+[tool.poetry]
+name = "canvass_api_model_store"
+version = "0.3.2"
+description = "FastAPI backend for Canvass AI Live"
+authors = ["Canvass Analytics <canvass@canvass.io>",]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10.7"
+fastapi = "^0.90.0"
+uvicorn = "^0.20.0"
+sqlmodel = "^0.0.8"
+alembic = "^1.9.3"
+asyncpg = "^0.27.0"
+PyJWT = "^2.6.0"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+psycopg2 = "^2.9.5"
+python-multipart = "^0.0.5"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.1"
+pytest-asyncio = "^0.20.3"
+pytest-cov = "^4.0.0"
+pytest-mock = "^3.10.0"
+pytest-sugar = "^0.9.6"
+pytest-xdist = {extras = ["psutil"], version = "^3.2.0"}
+requests = "^2.28.2"
+Faker = "^16.7.0"
+aiosqlite = "^0.18.0"
+factory-boy = "^3.2.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+known_local_folder = "tools,tests,canvass_api_model_store,alembic"
+sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+default_section = "THIRDPARTY"
+
+[tool.bandit]
+skips = ["B101", "B601"]
+exclude = ["tests", "venv"]
+
+[tool.skjold]
+sources = ["pypa"]
+report_only = true
+verbose = true
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration (deselect with '-m \"not integration\"')",
+    "unit: marks tests as unit (deselect with '-m \"not unit\"')",
+]
+testpaths = ["canvass_api_model_store/tests"]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+omit = ["canvass_api_model_store/tests/*", "venv/*", "canvass_api_model_store/main.py", "canvass_api_model_store/core/config.py"]
