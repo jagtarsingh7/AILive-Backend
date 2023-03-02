@@ -2,9 +2,8 @@
 
 from typing import List
 
-from api import constants
 from api.v1.auth import services
-from fastapi import APIRouter, Depends, HTTPException, security
+from fastapi import APIRouter, Depends, HTTPException, security, status
 from models import schemas
 from sqlalchemy import orm
 
@@ -30,7 +29,7 @@ async def create_user(new_user: schemas.UserCreate, db: orm.Session = Depends(se
 
     db_user = await services.get_user_by_email(new_user.email, db)
     if db_user:
-        raise HTTPException(status_code=constants.Bad_Request, detail="Email already in use")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already in use")
 
     try:
         new_user = await services.create_user(new_user, db)
@@ -39,7 +38,7 @@ async def create_user(new_user: schemas.UserCreate, db: orm.Session = Depends(se
 
     except Exception:
         raise HTTPException(
-            status_code=constants.Internal_Server_Error, detail="Internal server error"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
         )
 
 
@@ -64,7 +63,7 @@ async def generate_token(
     user = await services.authenticate_user(form_data.username, form_data.password, db)
 
     if not user:
-        raise HTTPException(status_code=constants.Unauthorized, detail="Invalid Credentials")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Credentials")
 
     return await services.create_token(user)
 

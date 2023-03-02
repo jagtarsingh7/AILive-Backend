@@ -8,11 +8,10 @@ Attributes:
 """
 
 import os
-from api import constants
 import jwt
 import models.models as _models
 import models.schemas as _schemas
-from fastapi import Depends, HTTPException, security
+from fastapi import Depends, HTTPException, security, status
 from models.database import SessionLocal
 from passlib import hash
 from sqlalchemy import orm
@@ -38,7 +37,7 @@ def get_db():
         yield db
     except SQLAlchemyError as e:
         db.rollback()
-        raise HTTPException(status_code=constants.Internal_Server_Error, detail="Database Error")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database Error")
     finally:
         db.close()
 
@@ -135,6 +134,8 @@ async def get_current_user(
         payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
         user = db.query(_models.User).get(payload["id"])
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=constants.Unauthorized, detail="Invalid Email or Password")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Email or Password"
+        )
 
     return _schemas.User.from_orm(user)

@@ -3,7 +3,6 @@
 import datetime as dt
 from typing import Optional, Dict, List, Any
 
-import models.models as _models
 from pydantic import BaseModel
 
 
