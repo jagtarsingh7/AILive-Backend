@@ -33,7 +33,7 @@ TOKEN_TYPE = os.environ.get("TOKEN_TYPE")
 
 async def update_model(
     user: _schemas.User, db: orm.Session, model: _schemas.ModelUpdate, model_id: int
-):
+) -> _schemas.Model:
     """Function to update a model.
 
     Args:
@@ -46,7 +46,7 @@ async def update_model(
         _schemas.Model: The updated model object.
 
     Raises:
-        HTTPException: If the model does not exist or if there is an internal server error.
+        HTTPException: If the model does not exist, there is a database error, or the request is unauthorized.
     """
     try:
         # Find if model for user exists
@@ -72,7 +72,6 @@ async def update_model(
         # Return updated model
         return _schemas.Model.from_orm(db_model)
     except HTTPException as e:
-        logger.exception(f"Model not found: {e}")
         raise e
     except Exception as e:
         logger.exception(f"Internal Server Error: {e}")
@@ -81,7 +80,7 @@ async def update_model(
         )
 
 
-async def model_selector(model_id: int, user: _schemas.User, db: orm.Session):
+async def model_selector(model_id: int, user: _schemas.User, db: orm.Session) -> _schemas.Model:
     """Function to select a model.
 
     Args:
@@ -93,7 +92,7 @@ async def model_selector(model_id: int, user: _schemas.User, db: orm.Session):
         The selected model object.
 
     Raises:
-        HTTPException: If the model does not exist.
+        HTTPException: If the model does not exist or there is a database error.
     """
     try:
         model = (
@@ -102,13 +101,15 @@ async def model_selector(model_id: int, user: _schemas.User, db: orm.Session):
             .filter(_models.Model.id == model_id)
             .one()
         )
-    except orm.exc.NoResultFound as e:
-        logger.exception(f"Error: {e}")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Model not found")
-    except Exception as e:
-        logger.exception(f"Internal Server Error: {e}")
+    except orm.exc.NoResultFound:
+        logger.exception(f"Model with id {model_id} not found")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Internal Server Error: {e}"
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Model with id {model_id} does not exist"
+        )
+    except Exception:
+        logger.exception("Internal Server Error.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error."
         )
 
     return model
