@@ -1,7 +1,7 @@
 """Module containing model routes defined for this API.
 
 Attributes:
-    model_router (fastapi.APIRouter): The router for the model routes.  
+    model_router (fastapi.APIRouter): The router for the model routes.
 """
 
 from typing import List
@@ -15,46 +15,25 @@ from sqlalchemy import orm
 model_router = APIRouter(prefix="/model")
 
 
-@model_router.post("/api", status_code=status.HTTP_201_CREATED)
-async def create_model(
-    model: schemas.ModelCreate,
-    user: schemas.User = Depends(authServ.get_current_user),
-    db: orm.Session = Depends(authServ.get_db),
-):
-    """Create a new model.
-
-    Args:
-        model (schemas.ModelCreate): The model data.
-        user (schemas.User): The current user.
-        db (orm.Session): The database session.
-
-    Returns:
-        schemas.Model: The created model.
-
-    Raises:
-        HTTPException: If there is a database error or the request is unauthorized.
-    """
-    return await modelServ.create_model(user=user, db=db, model=model)
-
-
-@model_router.delete("/api/{model_id}", status_code=status.HTTP_200_OK)
-async def delete_model(
+@model_router.put("/update-model/{model_id}")
+async def update_model(
     model_id: int,
+    model: schemas.ModelUpdate,
     user: schemas.User = Depends(authServ.get_current_user),
     db: orm.Session = Depends(authServ.get_db),
-):
-    """Delete an existing model.
+) -> schemas.Model:
+    """Update an existing model.
 
     Args:
-        model_id (int): The ID of the model to delete.
+        model_id (int): The ID of the model to be updated.
+        model (schemas.ModelUpdate): The updated model data.
         user (schemas.User): The current user.
         db (orm.Session): The database session.
 
     Returns:
-        dict: A message indicating success.
+        schemas.Model: The updated model.
 
     Raises:
         HTTPException: If the model does not exist, there is a database error, or the request is unauthorized.
     """
-    await modelServ.delete_model(model_id, user, db)
-    return {"message": "Successfully Deleted"}
+    return await modelServ.update_model(user=user, db=db, model=model, model_id=model_id)
