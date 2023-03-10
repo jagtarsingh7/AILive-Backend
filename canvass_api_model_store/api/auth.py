@@ -1,4 +1,8 @@
-"""Module containing auth routes defined for this API."""
+"""Module containing auth routes defined for this API.
+
+Attributes:
+    auth_router (fastapi.APIRouter): The router for the auth routes.
+"""
 
 from typing import List
 

@@ -1,8 +1,10 @@
 """Module containing function definition to create an instance of a FastAPI application."""
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from canvass_api_model_store.api.auth import auth_router
 from canvass_api_model_store.api.health import health_router
+from canvass_api_model_store.api.model import model_router
 from canvass_api_model_store.api.v1 import v1_router
 from canvass_api_model_store.core.config import settings
 
@@ -28,8 +30,18 @@ def create_app() -> FastAPI:
         backend_cors_origin=settings.backend_cors_origin,
     )
 
+    # Add CORS middleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.backend_cors_origin,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     app.router.include_router(health_router)
     app.router.include_router(v1_router)
     app.router.include_router(auth_router)
+    app.router.include_router(model_router)
 
     return app
