@@ -4,7 +4,7 @@ Attributes:
     model_router (fastapi.APIRouter): The router for the model routes.
 """
 
-from typing import List
+from typing import Dict, List
 
 from api.v1.auth import services as authServ
 from api.v1.model_store import services as modelServ
@@ -21,7 +21,7 @@ async def update_model(
     model: schemas.ModelUpdate,
     user: schemas.User = Depends(authServ.get_current_user),
     db: orm.Session = Depends(authServ.get_db),
-) -> schemas.Model:
+) -> Dict[str, int]:
     """Update an existing model.
 
     Args:

@@ -17,11 +17,13 @@ Attributes:
 
 import logging
 import os
+from typing import Dict
 
 import models.models as _models
 import models.schemas as _schemas
 from fastapi import HTTPException, security, status
 from sqlalchemy import orm
+from sqlalchemy.exc import NoResultFound, SQLAlchemyError
 
 oauth2schema = security.OAuth2PasswordBearer(tokenUrl="/auth/api/token")
 
@@ -33,7 +35,7 @@ TOKEN_TYPE = os.environ.get("TOKEN_TYPE")
 
 async def update_model(
     user: _schemas.User, db: orm.Session, model: _schemas.ModelUpdate, model_id: int
-) -> _schemas.Model:
+) -> Dict[str, int]:
     """Function to update a model.
 
     Args:
@@ -43,7 +45,7 @@ async def update_model(
         model_id (int): The model id.
 
     Returns:
-        _schemas.Model: The updated model object.
+        Dict[str, int]: A dictionary containing the model id and updated model version.
 
     Raises:
         HTTPException: If the model does not exist, there is a database error, or the request is unauthorized.
@@ -63,10 +65,15 @@ async def update_model(
         db.commit()
         db.refresh(db_model)
 
-        # Return updated model
-        return _schemas.Model.from_orm(db_model)
+        # Return model id and updated model version
+        return {"id": db_model.id, "model_version": db_model.model_version}
     except HTTPException as e:
         raise e
+    except SQLAlchemyError as e:
+        logger.exception(f"Database Error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database Error: {e}"
+        )
     except Exception as e:
         logger.exception(f"Internal Server Error: {e}")
         raise HTTPException(
@@ -86,7 +93,7 @@ async def model_selector(model_id: int, user: _schemas.User, db: orm.Session) ->
         The selected model object.
 
     Raises:
-        HTTPException: If the model does not exist or there is a database error.
+        HTTPException: If the model does not exist or there is an error during the database operation.
     """
     try:
         model = (
@@ -95,7 +102,7 @@ async def model_selector(model_id: int, user: _schemas.User, db: orm.Session) ->
             .filter(_models.Model.id == model_id)
             .one()
         )
-    except orm.exc.NoResultFound:
+    except NoResultFound:
         logger.exception(f"Model with id {model_id} not found")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"Model with id {model_id} does not exist"
@@ -103,7 +110,7 @@ async def model_selector(model_id: int, user: _schemas.User, db: orm.Session) ->
     except Exception:
         logger.exception("Internal Server Error.")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error."
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error"
         )
 
     return model
