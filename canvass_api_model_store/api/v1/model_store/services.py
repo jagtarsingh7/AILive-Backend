@@ -53,14 +53,8 @@ async def update_model(
         db_model = await model_selector(model_id, user, db)
 
         # Update model with new values
-        for attr in model.__dict__.keys():
-            if (
-                hasattr(db_model, attr)
-                and hasattr(model, attr)
-                and getattr(model, attr) is not None
-                and attr != "model_version"
-            ):
-                setattr(db_model, attr, getattr(model, attr))
+        for attr, value in model.dict(exclude_unset=True).items():
+            setattr(db_model, attr, value)
 
         # Auto increment model version
         db_model.model_version += 1
