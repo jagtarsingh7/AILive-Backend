@@ -100,8 +100,11 @@ async def model_selector(model_id: int, user: _schemas.User, db: orm.Session) ->
             db.query(_models.Model)
             .filter_by(user_id=user.id)
             .filter(_models.Model.id == model_id)
-            .one()
+            .one_or_none()
         )
+
+        if not model:
+            raise NoResultFound
     except NoResultFound:
         logger.exception(f"Model with id {model_id} not found")
         raise HTTPException(
