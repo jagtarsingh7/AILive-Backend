@@ -16,6 +16,7 @@ Attributes:
 """
 
 import logging
+from operator import and_
 import os
 
 import models.models as _models
