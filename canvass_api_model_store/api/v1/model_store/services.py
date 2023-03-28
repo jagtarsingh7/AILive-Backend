@@ -10,13 +10,9 @@ Functions:
 
 Attributes:
     logger: Instance of logging to show FastAPI messages
-    oauth2schema: OAuth2PasswordBearer object for token authentication.
-    JWT_SECRET: Secret key for JSON Web Token authentication.
-    TOKEN_TYPE: Token type for JSON Web Token authentication.
 """
 
 import logging
-import os
 from typing import Dict
 
 import models.models as _models
@@ -26,11 +22,6 @@ from sqlalchemy import orm
 from sqlalchemy.exc import NoResultFound, SQLAlchemyError
 
 logger = logging.getLogger(__name__)
-
-oauth2schema = security.OAuth2PasswordBearer(tokenUrl="/auth/api/token")
-
-JWT_SECRET = os.environ.get("JWT_SECRET")
-TOKEN_TYPE = os.environ.get("TOKEN_TYPE")
 
 
 async def create_model(
@@ -88,8 +79,7 @@ async def model_selector(model_id: int, user: _schemas.User, db: orm.Session) ->
     try:
         model = (
             db.query(_models.Model)
-            .filter_by(user_id=user.id)
-            .filter(_models.Model.id == model_id)
+            .filter(_models.Model.user_id == user.id, _models.Model.id == model_id)
             .one_or_none()
         )
 
@@ -142,7 +132,7 @@ async def delete_model(model_id: int, user: _schemas.User, db: orm.Session):
 
 async def update_model(
     user: _schemas.User, db: orm.Session, model: _schemas.ModelUpdate, model_id: int
-) -> Dict[str, int]:
+) -> _schemas.Model:
     """Function to update a model.
 
     Args:
@@ -170,10 +160,9 @@ async def update_model(
 
         # Commit the changes to the database
         db.commit()
-        db.refresh(db_model)
 
-        # Return model id and updated model version
-        return {"id": db_model.id, "model_version": db_model.model_version}
+        # Return updated model
+        return db_model
     except HTTPException as e:
         raise e
     except SQLAlchemyError as e:
