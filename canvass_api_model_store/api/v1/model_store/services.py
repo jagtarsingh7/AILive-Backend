@@ -133,3 +133,11 @@ async def delete_model(model_id: int, user: _schemas.User, db: orm.Session):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error"
         )
+
+"""Added get models functions"""
+async def get_model(user_id:int,id:int ,  db: orm.Session):
+    return db.query(_models.Model).filter(and_(_models.Model.id == id, _models.Model.user_id == user_id)).first()
+
+async def get_model_all(user_id:int,db: orm.Session):
+    return db.query(_models.Model).filter(_models.Model.user_id == user_id).all()
+

@@ -58,3 +58,23 @@ async def delete_model(
     """
     await modelServ.delete_model(model_id, user, db)
     return {"message": f"Successfully Deleted Model with id: {model_id}"}
+
+"""added get models to get models"""
+
+
+@model_router.get("/get", status_code=status.HTTP_200_OK)
+async def getModel(id:int,user: schemas.User = Depends(authServ.get_current_user),
+                   db: orm.Session = Depends(authServ.get_db)):
+    modelDisplay= await modelServ.get_model(user.id,id, db) 
+    return {"model": modelDisplay}
+
+@model_router.get("/get/all", status_code=status.HTTP_200_OK)
+async def getModel_all(user: schemas.User = Depends(authServ.get_current_user),db: orm.Session = Depends(authServ.get_db)):
+    
+    modelDisplay= await modelServ.get_model_all(user.id,db)
+    return {"model": modelDisplay}
+
+# @get_model_router.get("/", status_code=status.HTTP_200_OK)
+# async def getme():
+#       return {"model": "id"}
+
