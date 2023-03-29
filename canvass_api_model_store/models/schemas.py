@@ -1,7 +1,7 @@
 """Module containing schemas for auth models."""
 
 import datetime as dt
-from typing import Optional, Dict, List, Any
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
@@ -114,6 +114,34 @@ class Model(ModelBase):
         """Config for ORM mode."""
 
         orm_mode = True
+
+
+class ModelUpdate(BaseModel):
+    """ModelUpdate Schema for updating Model.
+
+    Attributes:
+        tags (Optional[str]): Comma separated list of tags for the model.
+        custom_functions (Optional[Dict[str, Any]]): Dictionary of custom functions for the model.
+        pre_model_order (Optional[List[str]]): List of pre-model order.
+        post_model_order (Optional[List[str]]): List of post-model order.
+        predict_function (Optional[str]): Name of the predict function.
+        storage_options (Optional[Dict[str, str]]): Dictionary of storage options for the model.
+        container_options (Optional[Dict[str, str]]): Dictionary of container options for the model.
+        model_metadata (Optional[Dict[Any, Any]]): Dictionary of model metadata.
+        input_features_and_types (Optional[Dict[str, str]]): Dictionary of input features and their types.
+        output_names_and_types (Optional[Dict[str, str]]): Dictionary of output names and their types.
+    """
+
+    tags: Optional[str] = None
+    custom_functions: Optional[Dict[str, Any]] = None
+    pre_model_order: Optional[List[str]] = None
+    post_model_order: Optional[List[str]] = None
+    predict_function: Optional[str] = None
+    storage_options: Optional[Dict[str, str]] = None
+    container_options: Optional[Dict[str, str]] = None
+    model_metadata: Optional[Dict[Any, Any]] = None
+    input_features_and_types: Optional[Dict[str, str]] = None
+    output_names_and_types: Optional[Dict[str, str]] = None
 
 
 class PredictionBase(BaseModel):
