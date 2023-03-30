@@ -89,11 +89,11 @@ async def update_model(
 @model_router.get("/{model_id}", status_code=status.HTTP_200_OK)
 async def read_model(model_id:int,user: schemas.User = Depends(auth_serv.get_current_user),
                    db: orm.Session = Depends(auth_serv.get_db)):
-    modelDisplay= await model_serv.read_model(user.id,model_id, db) 
-    return {"model": modelDisplay}
+    model_display= await model_serv.read_model(user.id,model_id, db) 
+    return {"model": model_display}
 
 @model_router.get("/", status_code=status.HTTP_200_OK)
 async def read_all_models(user: schemas.User = Depends(auth_serv.get_current_user),db: orm.Session = Depends(auth_serv.get_db)):
     
-    modelDisplay= await model_serv.read_all_models(user.id,db)
-    return {"model": modelDisplay}
+    model_display= await model_serv.read_all_models(user.id,db)
+    return {"model": model_display}
