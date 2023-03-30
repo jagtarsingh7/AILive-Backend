@@ -82,3 +82,18 @@ async def update_model(
         HTTPException: If the model does not exist, there is a database error, or the request is unauthorized.
     """
     return await model_serv.update_model(user=user, db=db, model=model, model_id=model_id)
+
+"""added get models to get models"""
+
+
+@model_router.get("/{model_id}", status_code=status.HTTP_200_OK)
+async def read_model(model_id:int,user: schemas.User = Depends(auth_serv.get_current_user),
+                   db: orm.Session = Depends(auth_serv.get_db)):
+    model_display= await model_serv.read_model(user.id,model_id, db) 
+    return {"model": model_display}
+
+@model_router.get("/", status_code=status.HTTP_200_OK)
+async def read_all_models(user: schemas.User = Depends(auth_serv.get_current_user),db: orm.Session = Depends(auth_serv.get_db)):
+    
+    model_display= await model_serv.read_all_models(user.id,db)
+    return {"model": model_display}

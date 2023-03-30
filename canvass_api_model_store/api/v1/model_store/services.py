@@ -13,6 +13,8 @@ Attributes:
 """
 
 import logging
+from operator import and_
+import os
 from typing import Dict
 
 import models.models as _models
@@ -175,3 +177,11 @@ async def update_model(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Internal Server Error: {e}"
         )
+
+"""Added get models functions"""
+async def read_model(user_id:int,id:int ,  db: orm.Session):
+    return db.query(_models.Model).filter(and_(_models.Model.id == id, _models.Model.user_id == user_id)).first()
+
+async def read_all_models(user_id:int,db: orm.Session):
+    return db.query(_models.Model).filter(_models.Model.user_id == user_id).all()
+
