@@ -8,11 +8,22 @@ from typing import Dict, List
 
 from api.v1.auth import services as auth_serv
 from api.v1.model_store import services as model_serv
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, UploadFile, File
 from models import schemas
 from sqlalchemy import orm
 
+import os
+from azure.storage.blob import BlobServiceClient
+
 model_router = APIRouter(prefix="/api/models")
+
+AZURE_STORAGE_CONNECTION_STRING = os.environ.get("AZURE_STORAGE_CONNECTION_STRING")
+AZURE_STORAGE_CONTAINER_NAME = "models"
+
+
+@model_router.post("/upload-file/")
+async def upload_file(file: UploadFile = File(...)):
+    return await model_serv.upload_file(file=file)
 
 
 @model_router.post("", status_code=status.HTTP_201_CREATED)
@@ -20,6 +31,7 @@ async def create_model(
     model: schemas.ModelCreate,
     user: schemas.User = Depends(auth_serv.get_current_user),
     db: orm.Session = Depends(auth_serv.get_db),
+    model_file: UploadFile = File(...),
 ):
     """Create a new model.
 
@@ -34,7 +46,8 @@ async def create_model(
     Raises:
         HTTPException: If there is a database error or the request is unauthorized.
     """
-    return await model_serv.create_model(user=user, db=db, model=model)
+    await model_serv.create_model(user=user, db=db, model=model)
+    return await model_serv.upload_file(file=model_file)
 
 
 @model_router.delete("/{model_id}", status_code=status.HTTP_200_OK)
@@ -83,17 +96,24 @@ async def update_model(
     """
     return await model_serv.update_model(user=user, db=db, model=model, model_id=model_id)
 
+
 """added get models to get models"""
 
 
 @model_router.get("/{model_id}", status_code=status.HTTP_200_OK)
-async def read_model(model_id:int,user: schemas.User = Depends(auth_serv.get_current_user),
-                   db: orm.Session = Depends(auth_serv.get_db)):
-    model_display= await model_serv.read_model(user.id,model_id, db) 
+async def read_model(
+    model_id: int,
+    user: schemas.User = Depends(auth_serv.get_current_user),
+    db: orm.Session = Depends(auth_serv.get_db),
+):
+    model_display = await model_serv.read_model(user.id, model_id, db)
     return {"model": model_display}
 
+
 @model_router.get("/", status_code=status.HTTP_200_OK)
-async def read_all_models(user: schemas.User = Depends(auth_serv.get_current_user),db: orm.Session = Depends(auth_serv.get_db)):
-    
-    model_display= await model_serv.read_all_models(user.id,db)
+async def read_all_models(
+    user: schemas.User = Depends(auth_serv.get_current_user),
+    db: orm.Session = Depends(auth_serv.get_db),
+):
+    model_display = await model_serv.read_all_models(user.id, db)
     return {"model": model_display}

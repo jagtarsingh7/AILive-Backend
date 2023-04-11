@@ -1,6 +1,7 @@
 """Module containing schemas for auth models."""
 
 import datetime as dt
+from fastapi import FastAPI, File, UploadFile
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
@@ -84,6 +85,12 @@ class ModelBase(BaseModel):
     model_version: int
     input_features_and_types: Dict[str, str]
     output_names_and_types: Dict[str, str]
+
+
+class ModelUpload(ModelBase):
+    """ModelUpload Schema for uploading Model."""
+
+    model_file: UploadFile = File(...)
 
 
 class ModelCreate(ModelBase):

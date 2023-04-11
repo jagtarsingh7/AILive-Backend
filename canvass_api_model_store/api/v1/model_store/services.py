@@ -14,20 +14,28 @@ Attributes:
 
 import logging
 from operator import and_
-import os
 from typing import Dict
 
 import models.models as _models
 import models.schemas as _schemas
-from fastapi import HTTPException, security, status
+from fastapi import HTTPException, status, UploadFile, File
 from sqlalchemy import orm
 from sqlalchemy.exc import NoResultFound, SQLAlchemyError
 
 logger = logging.getLogger(__name__)
 
+import pickle
+import os
+from azure.storage.blob import BlobServiceClient
+
+AZURE_STORAGE_CONNECTION_STRING = os.environ.get("AZURE_STORAGE_CONNECTION_STRING")
+AZURE_STORAGE_CONTAINER_NAME = "models"
+
 
 async def create_model(
-    user: _schemas.User, db: orm.Session, model: _schemas.ModelCreate
+    user: _schemas.User,
+    db: orm.Session,
+    model: _schemas.ModelCreate,
 ) -> Dict[str, int]:
     """Function to create new model.
 
@@ -44,12 +52,36 @@ async def create_model(
 
     """
     try:
-        model = _models.Model(**model.dict(), user_id=user.id)
-        db.add(model)
+        # Create model in database
+        db_model = _models.Model(**model.dict(), user_id=user.id)
+        db.add(db_model)
         db.commit()
-        db.refresh(model)
-        logger.info(f"Model created with id: {model.id}")
-        return {"model_id": model.id}
+        db.refresh(db_model)
+        model_id = db_model.id
+
+        # # Upload model file to Azure Blob Storage
+        # blob_service_client = BlobServiceClient.from_connection_string(
+        #     AZURE_STORAGE_CONNECTION_STRING
+        # )
+        # container_client = blob_service_client.get_container_client(AZURE_STORAGE_CONTAINER_NAME)
+        # blob_client = container_client.get_blob_client(f"{model_id}.pkl")
+        # pickle_data = pickle.dumps(await model_file.read())
+        # blob_client.upload_blob(pickle_data, overwrite=True)
+
+        # Upload model file to Azure Blob Storage
+        # blob_service_client = BlobServiceClient.from_connection_string(
+        #     AZURE_STORAGE_CONNECTION_STRING
+        # )
+        # model_file = model_file.dict()
+        # container_client = blob_service_client.get_container_client(AZURE_STORAGE_CONTAINER_NAME)
+        # blob_client = container_client.get_blob_client(model_file.filename)
+        # data = await model_file.read()
+        # blob_client.upload_blob(data, overwrite=True)
+
+        # Log success and return model ID
+        logger.info(f"Model created with id: {model_id}")
+        return {"model_id": model_id}
+
     except SQLAlchemyError:
         logger.exception("Error during model create SQL execution")
         db.rollback()
@@ -62,6 +94,20 @@ async def create_model(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error."
         )
+
+
+async def upload_file(file: _schemas.ModelUpload):
+    try:
+        blob_service_client = BlobServiceClient.from_connection_string(
+            AZURE_STORAGE_CONNECTION_STRING
+        )
+        container_client = blob_service_client.get_container_client(AZURE_STORAGE_CONTAINER_NAME)
+        blob_client = container_client.get_blob_client(file.filename)
+        data = await file.read()
+        blob_client.upload_blob(data, overwrite=True)
+        return {"message": "File uploaded successfully."}
+    except Exception as e:
+        return {"message": f"Error uploading file: {e}"}
 
 
 async def model_selector(model_id: int, user: _schemas.User, db: orm.Session) -> _schemas.Model:
@@ -178,10 +224,17 @@ async def update_model(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Internal Server Error: {e}"
         )
 
+
 """Added get models functions"""
-async def read_model(user_id:int,id:int ,  db: orm.Session):
-    return db.query(_models.Model).filter(and_(_models.Model.id == id, _models.Model.user_id == user_id)).first()
 
-async def read_all_models(user_id:int,db: orm.Session):
+
+async def read_model(user_id: int, id: int, db: orm.Session):
+    return (
+        db.query(_models.Model)
+        .filter(and_(_models.Model.id == id, _models.Model.user_id == user_id))
+        .first()
+    )
+
+
+async def read_all_models(user_id: int, db: orm.Session):
     return db.query(_models.Model).filter(_models.Model.user_id == user_id).all()
-
