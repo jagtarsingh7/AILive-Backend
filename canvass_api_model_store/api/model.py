@@ -29,7 +29,7 @@ async def upload_file(file: UploadFile = File(...)):
 @model_router.post("", status_code=status.HTTP_201_CREATED)
 async def create_model(
     # model: schemas.ModelCreate=Form(...),
-    text:schemas.ModelCreate=Depends(),
+    model:schemas.ModelCreate=Depends(),
     file: UploadFile =File(...),
     user: schemas.User = Depends(auth_serv.get_current_user),
     db: orm.Session = Depends(auth_serv.get_db)
@@ -50,10 +50,9 @@ async def create_model(
     """
    
     # Add more validation checks as needed
-    # return await model_serv.create_model(user=user, db=db, model=model, file=file)
-    # text = _models.Model(**text.dict(), user_id=user.id)
+    return await model_serv.create_model(user=user, db=db, model=model, file=file)
 
-    return {"message": f"Successfully Deleted Model with id:{text}"}
+   
 
 @model_router.delete("/{model_id}", status_code=status.HTTP_200_OK)
 async def delete_model(
