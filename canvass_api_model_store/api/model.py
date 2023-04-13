@@ -5,10 +5,10 @@ Attributes:
 """
 
 from typing import Dict, List
-
+import models.models as _models
 from api.v1.auth import services as auth_serv
 from api.v1.model_store import services as model_serv
-from fastapi import APIRouter, Depends, status, UploadFile, File
+from fastapi import APIRouter, Body, Depends, Form, HTTPException, status, UploadFile, File
 from models import schemas
 from sqlalchemy import orm
 
@@ -28,10 +28,12 @@ async def upload_file(file: UploadFile = File(...)):
 
 @model_router.post("", status_code=status.HTTP_201_CREATED)
 async def create_model(
-    model: schemas.ModelCreate,
+    # model: schemas.ModelCreate=Form(...),
+    text:schemas.ModelCreate=Depends(),
+    file: UploadFile =File(...),
     user: schemas.User = Depends(auth_serv.get_current_user),
-    db: orm.Session = Depends(auth_serv.get_db),
-    model_file: UploadFile = File(...),
+    db: orm.Session = Depends(auth_serv.get_db)
+   
 ):
     """Create a new model.
 
@@ -46,9 +48,12 @@ async def create_model(
     Raises:
         HTTPException: If there is a database error or the request is unauthorized.
     """
-    await model_serv.create_model(user=user, db=db, model=model)
-    return await model_serv.upload_file(file=model_file)
+   
+    # Add more validation checks as needed
+    # return await model_serv.create_model(user=user, db=db, model=model, file=file)
+    # text = _models.Model(**text.dict(), user_id=user.id)
 
+    return {"message": f"Successfully Deleted Model with id:{text}"}
 
 @model_router.delete("/{model_id}", status_code=status.HTTP_200_OK)
 async def delete_model(

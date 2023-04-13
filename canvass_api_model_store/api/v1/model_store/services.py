@@ -36,7 +36,8 @@ async def create_model(
     user: _schemas.User,
     db: orm.Session,
     model: _schemas.ModelCreate,
-) -> Dict[str, int]:
+    file: UploadFile
+):
     """Function to create new model.
 
     Args:
@@ -59,24 +60,13 @@ async def create_model(
         db.refresh(db_model)
         model_id = db_model.id
 
-        # # Upload model file to Azure Blob Storage
-        # blob_service_client = BlobServiceClient.from_connection_string(
-        #     AZURE_STORAGE_CONNECTION_STRING
-        # )
-        # container_client = blob_service_client.get_container_client(AZURE_STORAGE_CONTAINER_NAME)
-        # blob_client = container_client.get_blob_client(f"{model_id}.pkl")
-        # pickle_data = pickle.dumps(await model_file.read())
-        # blob_client.upload_blob(pickle_data, overwrite=True)
-
-        # Upload model file to Azure Blob Storage
-        # blob_service_client = BlobServiceClient.from_connection_string(
-        #     AZURE_STORAGE_CONNECTION_STRING
-        # )
-        # model_file = model_file.dict()
-        # container_client = blob_service_client.get_container_client(AZURE_STORAGE_CONTAINER_NAME)
-        # blob_client = container_client.get_blob_client(model_file.filename)
-        # data = await model_file.read()
-        # blob_client.upload_blob(data, overwrite=True)
+        blob_service_client = BlobServiceClient.from_connection_string(
+            AZURE_STORAGE_CONNECTION_STRING
+        )
+        container_client = blob_service_client.get_container_client(AZURE_STORAGE_CONTAINER_NAME)
+        blob_client = container_client.get_blob_client(file.filename)
+        data = await file.read()
+        blob_client.upload_blob(data, overwrite=True)
 
         # Log success and return model ID
         logger.info(f"Model created with id: {model_id}")
