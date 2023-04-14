@@ -29,11 +29,10 @@ async def upload_file(file: UploadFile = File(...)):
 @model_router.post("", status_code=status.HTTP_201_CREATED)
 async def create_model(
     # model: schemas.ModelCreate=Form(...),
-    model:schemas.ModelCreate=Depends(),
-    file: UploadFile =File(...),
+    model: schemas.ModelCreate = Depends(),
+    file: UploadFile = File(...),
     user: schemas.User = Depends(auth_serv.get_current_user),
-    db: orm.Session = Depends(auth_serv.get_db)
-   
+    db: orm.Session = Depends(auth_serv.get_db),
 ):
     """Create a new model.
 
@@ -48,11 +47,10 @@ async def create_model(
     Raises:
         HTTPException: If there is a database error or the request is unauthorized.
     """
-   
+
     # Add more validation checks as needed
     return await model_serv.create_model(user=user, db=db, model=model, file=file)
 
-   
 
 @model_router.delete("/{model_id}", status_code=status.HTTP_200_OK)
 async def delete_model(

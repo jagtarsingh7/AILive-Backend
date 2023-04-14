@@ -75,22 +75,16 @@ class ModelBase(BaseModel):
     """
 
     tags: str
-    # custom_functions:  Dict[str, str]
+    custom_functions: str
     pre_model_order: List[str]
     post_model_order: List[str]
     predict_function: str
-    # storage_options: Dict[str, str]
-    # container_options: Dict[str, str]
-    # model_metadata: Dict[Any, Any]
+    storage_options: str
+    container_options: str
+    model_metadata: str
     model_version: int
-    # input_features_and_types: Dict[str, str]
-    # output_names_and_types: Dict[str, str]
-
-
-class ModelUpload(ModelBase):
-    """ModelUpload Schema for uploading Model."""
-
-    model_file: UploadFile 
+    input_features_and_types: str
+    output_names_and_types: str
 
 
 class ModelCreate(ModelBase):

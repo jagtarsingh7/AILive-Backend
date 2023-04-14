@@ -24,7 +24,7 @@ from sqlalchemy.exc import NoResultFound, SQLAlchemyError
 
 logger = logging.getLogger(__name__)
 
-import pickle
+import json
 import os
 from azure.storage.blob import BlobServiceClient
 
@@ -33,10 +33,7 @@ AZURE_STORAGE_CONTAINER_NAME = "models"
 
 
 async def create_model(
-    user: _schemas.User,
-    db: orm.Session,
-    model: _schemas.ModelCreate,
-    file: UploadFile
+    user: _schemas.User, db: orm.Session, model: _schemas.ModelCreate, file: UploadFile
 ):
     """Function to create new model.
 
@@ -55,16 +52,31 @@ async def create_model(
     try:
         # Create model in database
         db_model = _models.Model(**model.dict(), user_id=user.id)
+
+        for attr_name in [
+            "custom_functions",
+            "storage_options",
+            "container_options",
+            "model_metadata",
+            "input_features_and_types",
+            "output_names_and_types",
+        ]:
+            attr_value = getattr(db_model, attr_name)
+            if attr_value:
+                setattr(db_model, attr_name, json.loads(attr_value))
+
         db.add(db_model)
         db.commit()
         db.refresh(db_model)
         model_id = db_model.id
+        filename, extension = os.path.splitext(file.filename)
+        blob_name = f"model-{model_id}{extension}"
 
         blob_service_client = BlobServiceClient.from_connection_string(
             AZURE_STORAGE_CONNECTION_STRING
         )
         container_client = blob_service_client.get_container_client(AZURE_STORAGE_CONTAINER_NAME)
-        blob_client = container_client.get_blob_client(file.filename)
+        blob_client = container_client.get_blob_client(blob_name)
         data = await file.read()
         blob_client.upload_blob(data, overwrite=True)
 
@@ -86,7 +98,7 @@ async def create_model(
         )
 
 
-async def upload_file(file: _schemas.ModelUpload):
+async def upload_file(file: UploadFile):
     try:
         blob_service_client = BlobServiceClient.from_connection_string(
             AZURE_STORAGE_CONNECTION_STRING
